@@ -103,7 +103,7 @@ public partial class AddIns
     {
         var searchItem = e.Value.ToString();
 
-        if (!string.IsNullOrEmpty(searchItem) && searchItem.Length > 2)
+        if (!string.IsNullOrEmpty(searchItem) && searchItem.Length > 1)
         {
             _addIns = AddInService.GetAll(_addInsPath).Where(p => p.Name.ToLower().Contains(searchItem.ToLower()))
                 .ToList();

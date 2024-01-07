@@ -1,1 +1,237 @@
 ﻿@page "/orders"
+@using Cafe.POS.Models
+@using Cafe.POS.Services
+
+<div class="row mt-3 mb-3">
+    <div class="col-6">
+        <h3>Order Index</h3>
+    </div>
+    <div class="col-6 text-end">
+        <button class="btn btn-outline-dark" type="button" @onclick="OpenAddUserDialog">
+            <i class="fa-solid fa-plus"></i> &nbsp; Add a new order
+        </button>
+    </div>
+</div>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				<div class="d-flex">
+					Customer Name
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Coffee
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Coffee Quantity
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Add In
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Add In Quantity
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Actual Price
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Paid Price
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Payment Mode
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Ordered Date
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					Approved By
+				</div>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		@{
+			IEnumerable<Order> orders = _orders;
+
+			foreach (var order in orders)
+			{
+				<tr>
+					<td>
+						@{
+							var customer = CustomerService.GetById(order.CustomerId);
+							<span>@(customer.Id == Guid.Empty ? "Customer" : customer.Username)</span>
+						}
+					</td>
+					<td>
+						@{
+							var coffee = CoffeeService.GetById(order.CoffeeId);
+							<span>@(coffee.Id == Guid.Empty ? "Coffee" : coffee.Name)</span>
+						}
+					</td>
+					<td class="text-end">
+						@order.CoffeeQuantity
+					</td>
+					<td>
+						@{
+							var addIn = AddInService.GetById(order.AddInId);
+							<span>@(addIn.Id == Guid.Empty ? "Customer" : addIn.Name)</span>
+						}
+					</td>
+					<td class="text-end">
+						@order.AddInQuantity
+					</td>
+					<td class="text-end">
+						@{
+							var amount = addIn.Price * order.AddInQuantity + coffee.Price * order.CoffeeQuantity;
+							<span>@amount</span>
+						}
+					</td>
+					<td class="text-end">
+						@order.TotalPrice
+					</td>
+					<td class="text-end">
+                    	@order.PaymentMode
+                    </td>
+					<td>@order.CreatedOn.ToString("MMM dd, yyyy h:mm tt")</td>
+					<td>
+					@{
+						var creator = UserService.GetById(order.CreatedBy);
+						<span>@(creator.Id == Guid.Empty ? "Administration" : creator.Username)</span>
+					}
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
+</table>
+
+@if(_showAddOrderDialog){
+	<ModalDialog Title="@_dialogTitle" OnClose="@OnAddOrderDialogClose" OkLabel="@_dialogOkLabel">
+		<form>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Customer</label>
+				<select class="form-control" @onchange="OnCustomerSelection">
+					<option disabled="" selected="" label="Select a customer"></option>
+					@foreach (var item in _customers)
+					{
+						<option value="@item.Id">@item.Username</option>
+					}
+				</select>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Coffee</label>
+				<select class="form-control" @bind="_orderModel.CoffeeId">
+					<option disabled="" selected="" label="Select a coffee"></option>
+					@foreach (var item in _coffees)
+					{
+						<option value="@item.Id">@item.Name</option>
+					}
+				</select>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Coffee Quantity</label>
+				<input type="number" class="form-control" @bind="_orderModel.CoffeeQuantity" placeholder="Enter the quantity of ordered coffee" @oninput="OnCoffeeQuantityChange" />
+			</div>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Add In</label>
+				<select class="form-control" @bind="_orderModel.AddInId">
+					<option disabled="" selected="" label="Select an add in"></option>
+					@foreach (var item in _addIns)
+					{
+						<option value="@item.Id">@item.Name</option>
+					}
+				</select>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Add In Quantity</label>
+				<input type="number" class="form-control" @bind="_orderModel.AddInQuantity" placeholder="Enter the quantity of ordered add in" @oninput="OnAddInQuantityChange" />
+			</div>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Payment Mode</label>
+				<select class="form-control" @bind="_orderModel.PaymentMode">
+					@foreach (var item in Enum.GetValues(typeof(PaymentMode)))
+					{
+						<option value="@item">@item</option>
+					}
+				</select>
+			</div>
+			<div class="row mb-3">
+				<div class="col-6">
+					<label class="form-label">&nbsp;Is Regular Customer?</label>
+					@if (_isRegularCustomer != null)
+					{
+						if (_isRegularCustomer.Value)
+						{
+							@* <h4><span class="badge badge-success">Yes</span></h4> *@
+							<h4>Yes</h4>
+						}
+						else
+						{
+							@* <h4><span class="badge badge-warning">No</span></h4> *@
+							<h4>No</h4>
+						}
+					}
+					else
+					{
+						@* <h4><span class="badge badge-info">Select a customer first</span></h4> *@
+						<h4>Select a customer first</h4>
+					}
+				</div>
+				<div class="col-6">
+					<label class="form-label">&nbsp;Complimentary Coffee?</label>
+					@if (_isComplimentaryCoffee != null)
+					{
+						if (_isComplimentaryCoffee.Value)
+						{
+							@* <h4><span class="badge badge-success">Yes</span></h4> *@
+							<h4>Yes</h4>
+						}
+						else
+						{
+							@* <h4><span class="badge badge-warning">No</span></h4> *@
+							<h4>No</h4>
+						}
+					}
+					else
+					{
+						@* <h4><span class="badge badge-info">Select a customer first</span></h4> *@
+						<h4>Select a customer first</h4>
+					}
+				</div>
+			</div>
+			<div class="row mb-3">
+	            <div class="col-6">
+            		<label class="form-label">&nbsp;Actual Price</label>
+            		<label class="form-label">&nbsp;Rs @_actualAmount</label>
+	            </div>
+	            <div class="col-6">
+            		<label class="form-label">&nbsp;Payable Amount</label>
+            		<label class="form-label">&nbsp;Rs @_payableAmount</label>
+	            </div>
+	        </div>
+			@if (!string.IsNullOrEmpty(_addOrderErrorMessage))
+			{
+				<ErrorMessage Type="danger" Message="@_addOrderErrorMessage" />
+			}
+		</form>
+	</ModalDialog>
+}

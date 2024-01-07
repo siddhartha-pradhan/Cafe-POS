@@ -100,7 +100,7 @@ public partial class Coffees
     {
         var searchItem = e.Value.ToString();
 
-        if (!string.IsNullOrEmpty(searchItem) && searchItem.Length > 2)
+        if (!string.IsNullOrEmpty(searchItem) && searchItem.Length > 1)
         {
             _coffees = CoffeeService.GetAll(_coffeesPath).Where(p => p.Name.Contains(searchItem, StringComparison.CurrentCultureIgnoreCase)).ToList();
         }

@@ -21,10 +21,10 @@
 		<a class='nav-link btn @(_tabFilter == "All" ? "active" : "")' @onclick='()=>TabFilter("All")'>All</a>
 	</li>
 	<li class="nav-item">
-		<a class='nav-link btn @(_tabFilter == "In Stock" ? "active" : "")' @onclick='()=>TabFilter("In Stock")'>In Stock</a>
+		<a class='nav-link btn @(_tabFilter == "In Stock" ? "active" : "")' @onclick='()=>TabFilter("Active")'>Active</a>
 	</li>
 	<li class="nav-item">
-		<a class='nav-link btn @(_tabFilter == "Out of Stock" ? "active" : "")' @onclick='()=>TabFilter("Out of Stock")'>Out of Stock</a>
+		<a class='nav-link btn @(_tabFilter == "Out of Stock" ? "active" : "")' @onclick='()=>TabFilter("In Active")'>In Active</a>
 	</li>
 </ul>		
 
@@ -42,10 +42,10 @@
 			</th>
 			<th>
 				<div class="d-flex">
-					Quantity
-					<a class='btn text-@(_sortBy == "quantity" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-						@onclick='()=>SortByHandler("quantity")'>
-						<span class='oi oi-sort-@(_sortBy == "quantity" ? _sortDirection : "ascending")'></span>
+					Price
+					<a class='btn text-@(_sortBy == "price" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+						@onclick='()=>SortByHandler("price")'>
+						<span class='oi oi-sort-@(_sortBy == "price" ? _sortDirection : "ascending")'></span>
 					</a>
 				</div>
 			</th>
@@ -81,7 +81,7 @@
 			_ => _sortBy switch
 			{
 				"coffee" => _sortDirection == "ascending" ? coffees.OrderBy(p => p.Name) : coffees.OrderByDescending(p => p.Name),
-				// "quantity" => _sortDirection == "ascending" ? CoffeeService.MergeSort(coffees.ToList()) : coffees.OrderByDescending(p => p.Title),
+				"price" => _sortDirection == "ascending" ? CoffeeService.MergeSort(coffees.ToList()) : coffees.OrderByDescending(p => p.Price),
 				"createdBy" => _sortDirection == "ascending" ? coffees.OrderBy(p => p.CreatedBy) : coffees.OrderByDescending(p => p.CreatedBy),
 				"createdAt" => _sortDirection == "ascending" ? coffees.OrderBy(p => p.CreatedOn) : coffees.OrderByDescending(p => p.CreatedOn),
 				_ => coffees
@@ -141,7 +141,7 @@
 			</div>
 			<div class="mb-3">
 				<label class="form-label">&nbsp;Coffee Description</label>
-				<input type="text" class="form-control" @bind="_coffeeModel.Description" placeholder="Enter the coffee description">
+				<textarea type="text" class="form-control" @bind="_coffeeModel.Description" placeholder="Enter the coffee description"></textarea>
 			</div>
 			<div class="mb-3">
 				<label class="form-label">&nbsp;Price</label>

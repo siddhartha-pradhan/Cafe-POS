@@ -21,10 +21,10 @@
 		<a class='nav-link btn @(_tabFilter == "All" ? "active" : "")' @onclick='()=>TabFilter("All")'>All</a>
 	</li>
 	<li class="nav-item">
-		<a class='nav-link btn @(_tabFilter == "Active" ? "active" : "")' @onclick='()=>TabFilter("In Stock")'>In Stock</a>
+		<a class='nav-link btn @(_tabFilter == "Active" ? "active" : "")' @onclick='()=>TabFilter("Active")'>Active</a>
 	</li>
 	<li class="nav-item">
-		<a class='nav-link btn @(_tabFilter == "In Active" ? "active" : "")' @onclick='()=>TabFilter("Out of Stock")'>Out of Stock</a>
+		<a class='nav-link btn @(_tabFilter == "In Active" ? "active" : "")' @onclick='()=>TabFilter("In Active")'>In Active</a>
 	</li>
 </ul>		
 
@@ -43,18 +43,18 @@
 			<th>
 				<div class="d-flex">
 					Price
-					<a class='btn text-@(_sortBy == "quantity" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-					   @onclick='()=>SortByHandler("quantity")'>
-						<span class='oi oi-sort-@(_sortBy == "quantity" ? _sortDirection : "ascending")'></span>
+					<a class='btn text-@(_sortBy == "price" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+					   @onclick='()=>SortByHandler("price")'>
+						<span class='oi oi-sort-@(_sortBy == "price" ? _sortDirection : "ascending")'></span>
 					</a>
 				</div>
 			</th>
 			<th>
             	<div class="d-flex">
             		Unit
-            		<a class='btn text-@(_sortBy == "quantity" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-            			@onclick='()=>SortByHandler("quantity")'>
-            			<span class='oi oi-sort-@(_sortBy == "quantity" ? _sortDirection : "ascending")'></span>
+            		<a class='btn text-@(_sortBy == "unit" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+            			@onclick='()=>SortByHandler("unit")'>
+            			<span class='oi oi-sort-@(_sortBy == "unit" ? _sortDirection : "ascending")'></span>
             		</a>
             	</div>
             </th>
@@ -90,6 +90,8 @@
 			_ => _sortBy switch
 			{
 				"addIn" => _sortDirection == "ascending" ? addIns.OrderBy(p => p.Name) : addIns.OrderByDescending(p => p.Name),
+				"price" => _sortDirection == "ascending" ? AddInService.MergeSort(addIns.ToList()) : addIns.OrderByDescending(p => p.Price),
+				"unit" => _sortDirection == "ascending" ? AddInService.MergeSort(addIns.ToList()) : addIns.OrderByDescending(p => p.Unit),
 				"createdBy" => _sortDirection == "ascending" ? addIns.OrderBy(p => p.CreatedBy) : addIns.OrderByDescending(p => p.CreatedBy),
 				"createdAt" => _sortDirection == "ascending" ? addIns.OrderBy(p => p.CreatedOn) : addIns.OrderByDescending(p => p.CreatedOn),
 				_ => addIns
@@ -139,16 +141,17 @@
 			</div>
 			<div class="mb-3">
 				<label class="form-label">&nbsp;Description</label>
-				<input type="text" class="form-control" @bind="_addInModel.Description" placeholder="Enter the title">
+				<textarea type="text" class="form-control" @bind="_addInModel.Description" placeholder="Enter the title"></textarea>
 			</div>
 			<div class="mb-3">
             	<label class="form-label">&nbsp;Unit</label>
-            	<select class="form-control" placeholder="Enter the unit of the item" @bind="_addInModel.Unit">
-            		@foreach (var item in Enum.GetValues(typeof(Unit)))
-            		{
-            			<option value="@item">@item</option>
-            		}
-            	</select>
+	            <select class="form-control" @bind="_addInModel.Unit">
+		            <option disabled="" selected="" label="Select a unit of the item"></option>
+		            @foreach (var item in Enum.GetValues(typeof(Unit)))
+		            {
+			            <option value="@item">@item</option>
+		            }
+	            </select>
             </div>
 			<div class="mb-3">
 				<label class="form-label">&nbsp;Price</label>

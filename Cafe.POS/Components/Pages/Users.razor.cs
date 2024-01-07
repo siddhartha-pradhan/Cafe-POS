@@ -56,6 +56,8 @@ public partial class Users
         _userModel = new User();
 
         _userPassword = "";
+        
+        _userRole = new ();
 
         _showAddUserDialog = true;
     }
@@ -94,7 +96,7 @@ public partial class Users
     {
         var searchItem = e.Value.ToString();
 
-        if (!string.IsNullOrEmpty(searchItem) && searchItem.Length > 2)
+        if (!string.IsNullOrEmpty(searchItem) && searchItem.Length > 1)
         {
             _users = UserService.GetAll(_usersPath).Where(p => p.Username.ToLower().Contains(searchItem.ToLower()))
                 .ToList();

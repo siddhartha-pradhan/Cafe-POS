@@ -33,7 +33,7 @@
 					<input type="search" class="form-control search" placeholder="Search a user" @oninput="SearchUserName" />
 					<a class='btn text-@(_sortBy == "username" ? "primary" : "secondary")' data-mdb-toggle="tooltip" 
 						@onclick='()=>SortByHandler("username")'>
-						<span class='oi oi-sort-@(_sortBy == "username" ? _sortDirection : "ascending")' />
+						<span class='oi oi-sort-@(_sortBy == "username" ? _sortDirection : "ascending")'></span>
 					</a>
 				</div>
 			</th>
@@ -42,7 +42,7 @@
 					Email
 					<a class='btn text-@(_sortBy == "email" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("email")'>
-						<span class='oi oi-sort-@(_sortBy == "email" ? _sortDirection : "ascending")' />
+						<span class='oi oi-sort-@(_sortBy == "email" ? _sortDirection : "ascending")'></span>
 					</a>
 				</div>
 			</th>
@@ -51,7 +51,7 @@
 					Role
 					<a class='btn text-@(_sortBy == "role" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("role")'>
-						<span class='oi oi-sort-@(_sortBy == "role" ? _sortDirection : "ascending")' />
+						<span class='oi oi-sort-@(_sortBy == "role" ? _sortDirection : "ascending")'></span>
 					</a>
 				</div>
 			</th>
@@ -60,7 +60,7 @@
 					Created At
 					<a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdAt")'>
-						<span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")' />
+						<span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")'></span>
 					</a>
 				</div>
 			</th>
@@ -117,7 +117,6 @@
 				</tr>
 			}
 		}
-		
 	</tbody>
 </table>
 

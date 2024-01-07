@@ -64,7 +64,7 @@ public class CustomerService : GenericService<Customer>
 		return customers;
 	}
 	
-	public static List<Customer> UpdateOrderCount(Guid customerId)
+	public static void UpdateOrderCount(Guid customerId)
 	{
 		var customers = GetAll(AppCustomersFilePath);
 
@@ -78,8 +78,6 @@ public class CustomerService : GenericService<Customer>
 		customerItem.Orders++;
 
 		SaveAll(customers, AppDataDirectoryPath, AppCustomersFilePath);
-
-		return customers;
 	}
 	
 	public static bool IsAvailableForComplimentaryCoffee(Guid customerId)
