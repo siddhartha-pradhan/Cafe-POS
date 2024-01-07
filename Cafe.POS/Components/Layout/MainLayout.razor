@@ -1,13 +1,11 @@
-﻿@using Cafe.POS.Models
-@using Cafe.POS.Services
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
 
 <div class="page">
     @if (_globalState.User != null)
     {
         <div class="sidebar">
-            <NavMenu Username="@_globalState.User.Username" UserRole="@_globalState.User.Role" LogoutHandler="LogoutHandler" />
+            <NavMenu Username="@_globalState.User.Username" Role="@_globalState.User.Role" LogoutHandler="LogoutHandler" />
         </div>
     }
 

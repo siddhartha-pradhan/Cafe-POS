@@ -4,7 +4,7 @@ namespace Cafe.POS.Services;
 
 public class GenericService<T> where T : class
 {
-    protected static List<T> GetAll(string filePath)
+    public static List<T> GetAll(string filePath)
     {
         if (!File.Exists(filePath))
         {
@@ -18,7 +18,7 @@ public class GenericService<T> where T : class
         return result ?? [];
     }
 
-    protected static void SaveAll(List<T> entity, string directoryPath, string filePath)
+    public  static void SaveAll(List<T> entity, string directoryPath, string filePath)
     {
         if (!Directory.Exists(directoryPath))
         {

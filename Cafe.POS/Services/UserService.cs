@@ -4,9 +4,9 @@ namespace Cafe.POS.Services;
 
 public class UserService : GenericService<User>
 {
-	private const string SeedUsername = "admin";
+	public const string SeedUsername = "admin";
+	public const string SeedPassword = "admin";
 	private const string SeedEmail = "admin@admin.com";
-	private const string SeedPassword = "admin";
 
 	private static readonly string AppDataDirectoryPath = UtilityService.GetAppDirectoryPath();
 	private static readonly string AppUsersFilePath = UtilityService.GetAppUsersFilePath();
@@ -53,6 +53,11 @@ public class UserService : GenericService<User>
 
 	public static User GetById(Guid id)
 	{
+		if (id == Guid.Empty)
+		{
+			return new User();
+		}
+		
 		var user = GetAll(AppUsersFilePath).FirstOrDefault(x => x.Id == id);
 
 		if (user == null)

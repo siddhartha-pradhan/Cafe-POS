@@ -2,14 +2,14 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
 	<div class="container-fluid">
-		<a class="navbar-brand" href="">Inventory</a>
+		<a class="navbar-brand" href="">POS</a>
 		<button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 	</div>
 </div>
 
-<div class='@(CollapseNavMenu ? "collapse" : "")' @onclick="ToggleNavMenu">
+<div @onclick="ToggleNavMenu">
 	<nav class="flex-column">
 		<div class="nav-item px-3">
 			<NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
@@ -27,12 +27,12 @@
 			</NavLink>
 		</div>
 		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="orders" Match="NavLinkMatch.All">
+			<NavLink class="nav-link" href="coffees" Match="NavLinkMatch.All">
 				<i class="fa-solid fa-cart-plus"></i> &nbsp; Coffee
 			</NavLink>
 		</div>
 		<div class="nav-item px-3">
-			<NavLink class="nav-link" href="orders" Match="NavLinkMatch.All">
+			<NavLink class="nav-link" href="add-ins" Match="NavLinkMatch.All">
 				<i class="fa-solid fa-cart-plus"></i> &nbsp; Add Ins
 			</NavLink>
 		</div>
