@@ -46,7 +46,7 @@ public class UtilityService
 
     public static string GetAppDirectoryPath()
     {
-        return @"D:\Learning\C#\Projects\Cafe.POS\Cafe.POS\wwwroot\data";
+        return @"D:\Client Work\21039857 Anita Shrestha\Application Development\Coursework\Development - I\Cafe.POS\wwwroot\data";
     }
 
     public static string GetAppUsersFilePath()
@@ -72,5 +72,10 @@ public class UtilityService
     public static string GetAppOrdersFilePath()
     {
         return Path.Combine(GetAppDirectoryPath(), "orders.json");
+    }
+    
+    public static string GetAppOrderAddInsFilePath()
+    {
+        return Path.Combine(GetAppDirectoryPath(), "order-add-ins.json");
     }
 }

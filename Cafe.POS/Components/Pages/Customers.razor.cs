@@ -74,6 +74,11 @@ public partial class Customers
         }
     }
 
+    private void TabFilter(string status)
+    {
+        _tabFilter = status;
+    }
+    
     private void SearchUserName(ChangeEventArgs e)
     {
         var searchItem = e.Value.ToString();

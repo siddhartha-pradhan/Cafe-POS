@@ -13,6 +13,18 @@
     </div>
 </div>
 
+<ul class="nav nav-tabs">
+	<li class="nav-item ">
+		<a class='nav-link btn @(_tabFilter == "All" ? "active" : "")' @onclick='()=>TabFilter("All")'>All</a>
+	</li>
+	<li class="nav-item">
+		<a class='nav-link btn @(_tabFilter == "Regular" ? "active" : "")' @onclick='()=>TabFilter("Regular")'>Active</a>
+	</li>
+	<li class="nav-item">
+		<a class='nav-link btn @(_tabFilter == "Complimentary" ? "active" : "")' @onclick='()=>TabFilter("Complimentary")'>In Active</a>
+	</li>
+</ul>		
+
 <table class="table">
 	<thead>
 		<tr>
@@ -68,16 +80,21 @@
 		@{
 			IEnumerable<Customer> customers = _customers;
 
-			customers = _sortBy switch
+			customers = _tabFilter switch
 			{
-				"username" => _sortDirection == "up" ? customers.OrderBy(p => p.Username) : customers.OrderByDescending(p => p.Username),
-				"phoneNumber" => _sortDirection == "up" ? customers.OrderBy(p => p.PhoneNumber) : customers.OrderByDescending(p => p.PhoneNumber),
-				"order" => _sortDirection == "up" ? customers.OrderBy(p => p.Orders) : customers.OrderByDescending(p => p.Orders),
-				"createdAt" => _sortDirection == "up" ? customers.OrderBy(p => p.CreatedOn) : customers.OrderByDescending(p => p.CreatedOn),
-				"createdBy" => _sortDirection == "up" ? customers.OrderBy(p => p.CreatedBy) : customers.OrderByDescending(p => p.CreatedBy),
-				_ => customers
+				"Regular" => CustomerService.GetRegularCustomers(),
+				"Complimentary" => CustomerService.GetComplimentaryCoffeeCustomers(),
+				_ => _sortBy switch
+				{
+					"username" => _sortDirection == "up" ? customers.OrderBy(p => p.Username) : customers.OrderByDescending(p => p.Username),
+					"phoneNumber" => _sortDirection == "up" ? customers.OrderBy(p => p.PhoneNumber) : customers.OrderByDescending(p => p.PhoneNumber),
+					"order" => _sortDirection == "up" ? CustomerService.MergeSort(customers.ToList()) : customers.OrderByDescending(p => p.Orders),
+					"createdAt" => _sortDirection == "up" ? customers.OrderBy(p => p.CreatedOn) : customers.OrderByDescending(p => p.CreatedOn),
+					"createdBy" => _sortDirection == "up" ? customers.OrderBy(p => p.CreatedBy) : customers.OrderByDescending(p => p.CreatedBy),
+					_ => customers
+				}
 			};
-
+			
 			foreach (var user in customers)
 			{
 				<tr>

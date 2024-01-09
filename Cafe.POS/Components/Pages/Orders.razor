@@ -1,7 +1,7 @@
 ﻿@page "/orders"
-@using System.Globalization
 @using Cafe.POS.Models
 @using Cafe.POS.Services
+@using System.Globalization
 
 <div class="row mt-3 mb-3">
     <div class="col-6">
@@ -62,10 +62,15 @@
 	<tbody>
 		@{
 			IEnumerable<Order> orders = _orders;
+			
+			IEnumerable<OrderAddIn> orderAddIns = _orderAddIns;
 
 			foreach (var order in orders)
 			{
 				<tr>
+					@{
+						var addIns = orderAddIns.Where(x => x.OrderId == order.Id);
+					}
 					<td>
 						@{
 							var customer = CustomerService.GetById(order.CustomerId);
@@ -80,13 +85,20 @@
 					</td>
 					<td>
 						@{
-							var addIn = AddInService.GetById(order.AddInId);
-							<span>@(addIn.Id == Guid.Empty ? "Customer" : addIn.Name) (@order.AddInQuantity)</span>
+							var addInElements = (from addIn in addIns let addInItem = AddInService.GetById(addIn.AddInId) 
+								let addInQuantity = addIn.AddInQuantity 
+								select $"{addInItem.Name} ({addInQuantity})").ToList();
+							var addInString = string.Join(", ", addInElements);
+							<span>@addInString</span>
 						}
 					</td>
 					<td class="text-end">
 						@{
-							var amount = addIn.Price * order.AddInQuantity + coffee.Price * order.CoffeeQuantity;
+							var decimalValue = (from addIn in addIns 
+								let addInItem = AddInService.GetById(addIn.AddInId) 
+								let addInQuantity = addIn.AddInQuantity 
+								select addInItem.Price * addInQuantity).Sum();
+							var amount = decimalValue + coffee.Price * order.CoffeeQuantity;
 							<span>@amount.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))</span>
 						}
 					</td>
@@ -136,35 +148,46 @@
 			<div class="row mb-3">
 				<div class="col-6">
 					<label class="form-label">&nbsp;Coffee</label>
-                    <select class="form-control" @bind="_orderModel.CoffeeId">
-                    	<option selected="selected" disabled="disabled">Select a Coffee</option>
-                    	@foreach (var item in _coffees)
-                    	{
-                    		<option value="@item.Id">@item.Name (Rs @item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP")))</option>
-                    	}
-                    </select>
-				</div>
-				<div class="col-6">
-					<label class="form-label">&nbsp;Coffee Quantity</label>
-                    <input type="number" class="form-control" @bind="_orderModel.CoffeeQuantity" placeholder="Enter the quantity of ordered coffee" @oninput="OnCoffeeQuantityChange" />
-				</div>
-			</div>
-			<div class="row mb-3">
-				<div class="col-6">
-					<label class="form-label">&nbsp;Add In</label>
-					<select class="form-control" @bind="_orderModel.AddInId">
-						<option disabled="" selected="" label="Select an add in"></option>
-						@foreach (var item in _addIns)
+					<select class="form-control" @bind="_orderModel.CoffeeId">
+						<option selected="selected" disabled="disabled">Select a Coffee</option>
+						@foreach (var item in _coffees)
 						{
 							<option value="@item.Id">@item.Name (Rs @item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP")))</option>
 						}
 					</select>
 				</div>
 				<div class="col-6">
-					<label class="form-label">&nbsp;Add In Quantity</label>
-					<input type="number" class="form-control" @bind="_orderModel.AddInQuantity" placeholder="Enter the quantity of ordered add in" @oninput="OnAddInQuantityChange" />
+					<label class="form-label">&nbsp;Coffee Quantity</label>
+					<input type="number" class="form-control" @bind="_orderModel.CoffeeQuantity" placeholder="Enter the quantity of ordered coffee" @oninput="OnCoffeeQuantityChange" />
 				</div>
 			</div>
+			@for (var i = 0; i < _orderAddInModel.Count; i++)
+            {
+                var currentIndex = i;
+            
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label class="form-label">&nbsp;Add In</label>
+                        <select class="form-control" value="@_orderAddInModel[currentIndex].AddInId" @oninput="(e) => _orderAddInModel[currentIndex].AddInId = Guid.Parse(e.Value.ToString())">
+                            <option disabled="" selected="" label="Select an add in"></option>
+                            @foreach (var item in _addIns)
+                            {
+                                <option value="@item.Id">@item.Name (Rs @item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP")))</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label">&nbsp;Add In Quantity</label>
+                        <input type="number" class="form-control" @bind="_orderAddInModel[currentIndex].AddInQuantity" placeholder="Enter the quantity of ordered add in" @oninput="(e) => OnAddInQuantityChange(e, currentIndex)" />
+                    </div>
+                    <div class="col-1 mt-1">
+                        <button class="btn btn-outline-dark mt-4" type="button" @onclick="AddAddIn">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+
 			<div class="row mb-3">
 				<div class="col-6">
 					<label class="form-label">&nbsp;Is Regular Customer?</label>

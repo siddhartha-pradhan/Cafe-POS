@@ -56,6 +56,7 @@ public class CoffeeService : GenericService<Coffee>
 		coffeeItem.Name = coffee.Name;
 		coffeeItem.Description = coffee.Description;
 		coffeeItem.Price = coffee.Price;
+		coffeeItem.IsActive = coffee.IsActive;
 		coffeeItem.LastModifiedOn = DateTime.Now;
 		coffeeItem.LastModifiedBy = coffee.LastModifiedBy;
 

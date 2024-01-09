@@ -2,12 +2,12 @@
 
 public enum Unit
 {
-    Spoon = 1,
-    Scoop = 2,
+    Bottle = 1,
+    Bowl = 2,
     Cup = 3,
     Glass = 4,
-    Bottle = 5,
+    Piece = 5,
     Plate = 6,
-    Bowl = 7,
-    Piece = 8
+    Scoop = 7,
+    Spoon = 8,
 }

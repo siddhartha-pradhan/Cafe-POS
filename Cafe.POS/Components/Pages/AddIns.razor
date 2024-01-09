@@ -1,7 +1,7 @@
 ﻿@page "/add-ins"
-@using System.Globalization
 @using Cafe.POS.Models
 @using Cafe.POS.Services
+@using System.Globalization
 
 <div class="row mt-3 mb-3">
 	<div class="col-6">
@@ -128,10 +128,10 @@
 				<td class='@(addIn.IsActive ? "" : "text-danger")'>
 					@if (_globalState.User is { Role: Role.Admin })
 					{
-						<button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditAddInDialog(addIn)">
+						<button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenPasswordDialog(addIn, true)">
 							<i class="fa-solid fa-pen"></i> &nbsp; Edit
 						</button>
-						<button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteAddInDialog(addIn)">
+						<button class="btn btn-outline-danger" type="button" @onclick="()=>OpenPasswordDialog(addIn, false)">
 							<i class="fa-solid fa-trash"></i> &nbsp; Delete
 						</button>
 					}
@@ -173,6 +173,23 @@
 	@if (!string.IsNullOrEmpty(_upsertAddInErrorMessage))
 	{
 		<ErrorMessage Type="danger" Message="@_upsertAddInErrorMessage" />
+	}
+	</ModalDialog>
+}
+
+@if (_showPasswordDialog)
+{
+	<ModalDialog Title="@_dialogTitle" OnClose="@OnPasswordVerifyDialogClose" OkLabel="@_dialogOkLabel">
+		<form>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Password</label>
+				<input type="password" class="form-control" @bind="_password" placeholder="Enter the admin password">
+			</div>
+		</form>
+
+	@if (!string.IsNullOrEmpty(_passwordErrorMessage))
+	{
+		<ErrorMessage Type="danger" Message="@_passwordErrorMessage" />
 	}
 	</ModalDialog>
 }

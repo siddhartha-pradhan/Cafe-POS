@@ -1,7 +1,7 @@
 ﻿@page "/coffees"
-@using System.Globalization
 @using Cafe.POS.Models
 @using Cafe.POS.Services
+@using System.Globalization
 
 <div class="row mt-3 mb-3">
 	<div class="col-6">
@@ -22,10 +22,10 @@
 		<a class='nav-link btn @(_tabFilter == "All" ? "active" : "")' @onclick='()=>TabFilter("All")'>All</a>
 	</li>
 	<li class="nav-item">
-		<a class='nav-link btn @(_tabFilter == "In Stock" ? "active" : "")' @onclick='()=>TabFilter("Active")'>Active</a>
+		<a class='nav-link btn @(_tabFilter == "Active" ? "active" : "")' @onclick='()=>TabFilter("Active")'>Active</a>
 	</li>
 	<li class="nav-item">
-		<a class='nav-link btn @(_tabFilter == "Out of Stock" ? "active" : "")' @onclick='()=>TabFilter("In Active")'>In Active</a>
+		<a class='nav-link btn @(_tabFilter == "In Active" ? "active" : "")' @onclick='()=>TabFilter("In Active")'>In Active</a>
 	</li>
 </ul>		
 
@@ -121,10 +121,10 @@
 						{
 							case Role.Admin:
 							{
-								<button class="btn btn-outline-secondary" type="button" @onclick="() => OpenEditCoffeeDialog(coffee)">
+								<button class="btn btn-outline-secondary" type="button" @onclick="() => OpenPasswordDialog(coffee, true)">
 									<i class="fa-solid fa-pen"></i> &nbsp; Edit
 								</button>
-								<button class="btn btn-outline-danger" type="button" @onclick="() => OpenDeleteCoffeeDialog(coffee)">
+								<button class="btn btn-outline-danger" type="button" @onclick="() => OpenPasswordDialog(coffee, false)">
 									<i class="fa-solid fa-trash"></i> &nbsp; Delete
 								</button>
 								break;
@@ -176,6 +176,23 @@
 		@if (!string.IsNullOrEmpty(_deleteCoffeeErrorMessage))
 		{
 			<ErrorMessage Type="danger" Message="@_deleteCoffeeErrorMessage" />
+		}
+	</ModalDialog>
+}
+
+@if (_showPasswordDialog)
+{
+	<ModalDialog Title="@_dialogTitle" OnClose="@OnPasswordVerifyDialogClose" OkLabel="@_dialogOkLabel">
+		<form>
+			<div class="mb-3">
+				<label class="form-label">&nbsp;Password</label>
+				<input type="password" class="form-control" @bind="_password" placeholder="Enter the admin password">
+			</div>
+		</form>
+
+		@if (!string.IsNullOrEmpty(_passwordErrorMessage))
+		{
+			<ErrorMessage Type="danger" Message="@_passwordErrorMessage" />
 		}
 	</ModalDialog>
 }

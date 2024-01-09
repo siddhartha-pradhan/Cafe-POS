@@ -7,7 +7,7 @@
 		<h3>Stats Index</h3>
 	</div>
 	<div class="col-6 text-end">
-		<button class="btn btn-outline-dark" type="button" @onclick='() => GeneratePdf("report.pdf")'>
+		<button class="btn btn-outline-dark" type="button" @onclick="OpenReportDialog">
 			<i class="fa-solid fa-plus"></i> &nbsp; Download PDF
 		</button>
 	</div>
@@ -69,3 +69,40 @@
 	}
 	</tbody>
 </table>
+
+@if(_showStatsDialog)
+{
+	<ModalDialog Title="@_dialogTitle" OnClose="@OnDownloadReport" OkLabel="@_dialogOkLabel">
+		<form>
+			<div class="mb-3">
+				<label class="form-label">Select an action to download a report</label>
+				<div class="form-check mb-2">
+					<input id="userRole" type="radio" class="form-check-input" name="frequency" value="1" @onchange="FrequencyChangeHandler">
+					<label class="form-check-label" for="userRole">Daily</label>
+				</div>
+				<div class="form-check mb-2">
+					<input id="adminRole" type="radio" class="form-check-input" name="frequency" value="2" @onchange="FrequencyChangeHandler">
+					<label class="form-check-label" for="adminRole">Monthly</label>
+				</div>
+				@if (_showMonthsDropdown)
+				{
+					<select class="form-control" @bind="_selectedMonth">
+						<option selected="selected" disabled="disabled">Select a Month</option>
+						@for (var i = 1; i <= 12; i++)
+                        {
+                            <option value="@i">@DateTimeFormatInfo.CurrentInfo.GetMonthName(i)</option>
+                        }
+					</select>
+				}
+			</div>
+			@if (!string.IsNullOrEmpty(_recordErrorMessage))
+			{
+				<ErrorMessage Type="danger" Message="@_recordErrorMessage" />
+			}
+			@if (!string.IsNullOrEmpty(_recordSuccessMessage))
+			{
+				<ErrorMessage Type="success" Message="@_recordSuccessMessage" />
+			}
+		</form>
+	</ModalDialog>
+}

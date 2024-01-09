@@ -2,15 +2,11 @@
 
 public class Order : BaseEntity
 {
-    public Guid CustomerId { get; set; }
+    public Guid CustomerId { get; set; } = Guid.Empty;
     
-    public Guid CoffeeId { get; set; }
-    
-    public Guid AddInId { get; set; }
+    public Guid CoffeeId { get; set; } = Guid.Empty;
     
     public int CoffeeQuantity { get; set; }
-
-    public decimal AddInQuantity { get; set; }
     
     public decimal TotalPrice { get; set; }
     

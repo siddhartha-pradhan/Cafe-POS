@@ -13,17 +13,23 @@ public partial class AddIns
     
     private bool _showUpsertAddInDialog { get; set; }
 
+    private bool _isForEditAction { get; set; } = false;
+    
+    private bool _showPasswordDialog { get; set; }
+
     private bool _showDeleteAddInDialog { get; set; }
     
     private AddIn? _addInModel { get; set; }
     
     private string _dialogTitle { get; set; }
+
+    private string _password { get; set; }
     
     private string _dialogOkLabel { get; set; }
     
     private string _upsertAddInErrorMessage { get; set; }
     
-    private string _orderAddInErrorMessage { get; set; }
+    private string _passwordErrorMessage { get; set; }
     
     private string _deleteAddInErrorMessage { get; set; }
     
@@ -56,9 +62,26 @@ public partial class AddIns
         _showUpsertAddInDialog = true;
     }
 
+    private void OpenPasswordDialog(AddIn addIn, bool isForEditAction)
+    {
+        _dialogTitle = "Enter your password";
+
+        _dialogOkLabel = "Save";
+
+        _passwordErrorMessage = "";
+
+        _showPasswordDialog = true;
+
+        _addInModel = addIn;
+        
+        _password = "";
+
+        _isForEditAction = isForEditAction;
+    }
+    
     private void OpenEditAddInDialog(AddIn addIn)
     {
-        _dialogTitle = "Edit an existing addIn";
+        _dialogTitle = "Edit an existing add in";
 
         _dialogOkLabel = "Save";
 
@@ -71,7 +94,7 @@ public partial class AddIns
 
     private void OpenDeleteAddInDialog(AddIn addIn)
     {
-        _dialogTitle = "Delete a addIn";
+        _dialogTitle = "Delete an add in";
 
         _dialogOkLabel = "Confirm";
 
@@ -166,6 +189,60 @@ public partial class AddIns
 
                 Console.WriteLine(e.Message);
             }
+        }
+    }
+    
+    private void OnPasswordVerifyDialogClose(bool isClosed)
+    {
+        try
+        {
+            if (isClosed)
+            {
+                _showPasswordDialog = false;
+            }
+            else
+            {
+                if (_isForEditAction)
+                {
+                    _passwordErrorMessage = "";
+
+                    var username = _globalState.User.Username;
+                    
+                    var passwordIsValid = UserService.Login(username, _password);
+
+                    if (passwordIsValid == null)
+                    {
+                        throw new Exception("Invalid password, please try again.");
+                    }
+
+                    _showPasswordDialog = false;
+                    
+                    OpenEditAddInDialog(_addInModel);
+                }
+                else
+                {
+                    _passwordErrorMessage = "";
+
+                    var username = _globalState.User.Username;
+                    
+                    var passwordIsValid = UserService.Login(username, _password);
+
+                    if (passwordIsValid == null)
+                    {
+                        throw new Exception("Invalid password, please try again.");
+                    }
+
+                    _showPasswordDialog = false;
+                    
+                    OpenDeleteAddInDialog(_addInModel);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _passwordErrorMessage = "Invalid password, please try again.";
+
+            Console.WriteLine(e.Message);
         }
     }
 

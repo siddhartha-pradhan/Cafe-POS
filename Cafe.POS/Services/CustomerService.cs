@@ -91,7 +91,7 @@ public class CustomerService : GenericService<Customer>
 			throw new Exception("Customer not found.");
 		}
 
-		return customerItem.Orders % 10 == 0;
+		return customerItem.Orders >= 10 && customerItem.Orders % 10 == 0;
 	}
 	
 	public static bool IsRegularCustomer(Guid customerId)
@@ -132,6 +132,22 @@ public class CustomerService : GenericService<Customer>
 		return customers;
 	}
 
+	public static List<Customer> GetRegularCustomers()
+	{
+		var customers = GetAll(AppCustomersFilePath);
+
+		var customerIds = (from customer in customers where IsRegularCustomer(customer.Id) select customer.Id).ToList();
+
+		return customers.Where(x => customerIds.Contains(x.Id)).ToList();
+	}
+	
+	public static List<Customer> GetComplimentaryCoffeeCustomers()
+	{
+		var users = GetAll(AppCustomersFilePath).Where(x => x.Orders >= 10);
+
+		return users.Where(x => x.Orders % 10 == 0).ToList();
+	}
+	
 	public static List<Customer> MergeSort(List<Customer> unsorted)
 	{
 		if (unsorted.Count <= 1)

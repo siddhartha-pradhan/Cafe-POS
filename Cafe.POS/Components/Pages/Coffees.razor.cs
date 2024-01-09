@@ -28,7 +28,15 @@ public partial class Coffees
     
     private string _sortBy = "coffee";
     
-    private string _sortDirection = "ascending";
+    private string _sortDirection = "up";
+    
+    private string _passwordErrorMessage = "";
+    
+    private bool _showPasswordDialog = false;
+    
+    private string _password;
+
+    private bool _isForEditAction = false;
     
     private readonly string _coffeesPath = UtilityService.GetAppCoffeesFilePath();
 
@@ -81,13 +89,13 @@ public partial class Coffees
     {
         if (_sortBy == sortByName)
         {
-            _sortDirection = _sortDirection == "ascending" ? "descending" : "ascending";
+            _sortDirection = _sortDirection == "up" ? "down" : "up";
         }
         else
         {
             _sortBy = sortByName;
 
-            _sortDirection = "ascending";
+            _sortDirection = "up";
         }
     }
 
@@ -206,5 +214,77 @@ public partial class Coffees
         };
         
         _coffees = CoffeeService.Update(coffeeModel);
+    }
+
+    private void OnPasswordVerifyDialogClose(bool isClosed)
+    {
+        try
+        {
+            if (isClosed)
+            {
+                _showPasswordDialog = false;
+            }
+            else
+            {
+                if (_isForEditAction)
+                {
+                    _passwordErrorMessage = "";
+
+                    var username = _globalState.User.Username;
+                    
+                    var passwordIsValid = UserService.Login(username, _password);
+
+                    if (passwordIsValid == null)
+                    {
+                        throw new Exception("Invalid password, please try again.");
+                    }
+
+                    _showPasswordDialog = false;
+                    
+                    OpenEditCoffeeDialog(_coffeeModel);
+                }
+                else
+                {
+                    _passwordErrorMessage = "";
+
+                    var username = _globalState.User.Username;
+                    
+                    var passwordIsValid = UserService.Login(username, _password);
+
+                    if (passwordIsValid == null)
+                    {
+                        throw new Exception("Invalid password, please try again.");
+                    }
+
+                    _showPasswordDialog = false;
+                    
+                    OpenDeleteCoffeeDialog(_coffeeModel);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _passwordErrorMessage = "Invalid password, please try again.";
+
+            Console.WriteLine(e.Message);
+        }
+    }
+    
+    
+    private void OpenPasswordDialog(Coffee coffee, bool isForEditAction)
+    {
+        _dialogTitle = "Enter your password";
+
+        _dialogOkLabel = "Save";
+
+        _passwordErrorMessage = "";
+
+        _showPasswordDialog = true;
+
+        _coffeeModel = coffee;
+        
+        _password = "";
+
+        _isForEditAction = isForEditAction;
     }
 }

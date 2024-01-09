@@ -55,6 +55,7 @@ public class AddInService : GenericService<AddIn>
 
 		addInItem.Name = addIn.Name;
 		addInItem.Description = addIn.Description;
+		addInItem.IsActive = addIn.IsActive;
 		addInItem.Price = addIn.Price;
 		addInItem.Unit = addIn.Unit;
 		addInItem.LastModifiedOn = DateTime.Now;
