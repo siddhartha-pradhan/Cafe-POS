@@ -1,4 +1,5 @@
 ﻿@page "/add-ins"
+@using System.Globalization
 @using Cafe.POS.Models
 @using Cafe.POS.Services
 
@@ -33,10 +34,15 @@
 		<tr>
 			<th>
 				<div class="d-flex">
-					<input type="search" class="form-control search" placeholder="Search an Add In" @oninput="SearchAddInName" />
-					<a class='btn text-@(_sortBy == "addIn" ? "primary" : "secondary")' data-mdb-toggle="tooltip" 
-						@onclick='()=>SortByHandler("addIn")'>
-						<span class='oi oi-sort-@(_sortBy == "addIn" ? _sortDirection : "ascending")'></span>
+					Status
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					<input type="search" class="form-control search" placeholder="Search an Add In" @oninput="SearchAddInName"/>
+					<a class='btn text-@(_sortBy == "addIn" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+					   @onclick='() => SortByHandler("addIn")'>
+						<i class="fa-solid fa-sort-@(_sortBy == "addIn" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -44,26 +50,26 @@
 				<div class="d-flex">
 					Price
 					<a class='btn text-@(_sortBy == "price" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-					   @onclick='()=>SortByHandler("price")'>
-						<span class='oi oi-sort-@(_sortBy == "price" ? _sortDirection : "ascending")'></span>
+					   @onclick='() => SortByHandler("price")'>
+						<i class="fa-solid fa-sort-@(_sortBy == "price" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
 			<th>
-            	<div class="d-flex">
-            		Unit
-            		<a class='btn text-@(_sortBy == "unit" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-            			@onclick='()=>SortByHandler("unit")'>
-            			<span class='oi oi-sort-@(_sortBy == "unit" ? _sortDirection : "ascending")'></span>
-            		</a>
-            	</div>
-            </th>
+				<div class="d-flex">
+					Unit
+					<a class='btn text-@(_sortBy == "unit" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
+					   @onclick='() => SortByHandler("unit")'>
+						<i class="fa-solid fa-sort-@(_sortBy == "unit" ? _sortDirection : "up")"></i>
+					</a>
+				</div>
+			</th>
 			<th>
 				<div class="d-flex">
 					Created By
 					<a class='btn text-@(_sortBy == "createdBy" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-						@onclick='()=>SortByHandler("createdBy")'>
-						<span class='oi oi-sort-@(_sortBy == "createdBy" ? _sortDirection : "ascending")'></span>
+					   @onclick='() => SortByHandler("createdBy")'>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdBy" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -71,8 +77,8 @@
 				<div class="d-flex">
 					Created At
 					<a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
-						@onclick='()=>SortByHandler("createdAt")'>
-						<span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")'></span>
+					   @onclick='() => SortByHandler("createdAt")'>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdAt" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -89,11 +95,11 @@
 			"In Active" => addIns.Where(x => !x.IsActive),
 			_ => _sortBy switch
 			{
-				"addIn" => _sortDirection == "ascending" ? addIns.OrderBy(p => p.Name) : addIns.OrderByDescending(p => p.Name),
-				"price" => _sortDirection == "ascending" ? AddInService.MergeSort(addIns.ToList()) : addIns.OrderByDescending(p => p.Price),
-				"unit" => _sortDirection == "ascending" ? AddInService.MergeSort(addIns.ToList()) : addIns.OrderByDescending(p => p.Unit),
-				"createdBy" => _sortDirection == "ascending" ? addIns.OrderBy(p => p.CreatedBy) : addIns.OrderByDescending(p => p.CreatedBy),
-				"createdAt" => _sortDirection == "ascending" ? addIns.OrderBy(p => p.CreatedOn) : addIns.OrderByDescending(p => p.CreatedOn),
+				"addIn" => _sortDirection == "up" ? addIns.OrderBy(p => p.Name) : addIns.OrderByDescending(p => p.Name),
+				"price" => _sortDirection == "up" ? AddInService.MergeSort(addIns.ToList()) : addIns.OrderByDescending(p => p.Price),
+				"unit" => _sortDirection == "up" ? addIns.OrderBy(p => p.Unit) : addIns.OrderByDescending(p => p.Unit),
+				"createdBy" => _sortDirection == "up" ? addIns.OrderBy(p => p.CreatedBy) : addIns.OrderByDescending(p => p.CreatedBy),
+				"createdAt" => _sortDirection == "up" ? addIns.OrderBy(p => p.CreatedOn) : addIns.OrderByDescending(p => p.CreatedOn),
 				_ => addIns
 			}
 		};
@@ -101,20 +107,25 @@
 		foreach (var addIn in addIns)
 		{
 			<tr>
-				<td>@addIn.Name</td>
-				<td>@addIn.Price</td>
-				<td>@addIn.Unit</td>
 				<td>
+					<div class="form-check">
+                        <input class="form-check-input me-0" type="checkbox" checked="@addIn.IsActive" @onchange='()=>UpdateActiveStatus(addIn)' />
+                    </div>
+				</td>
+				<td class='@(addIn.IsActive ? "" : "text-danger")'>@addIn.Name</td>
+				<td class='text-end @(addIn.IsActive ? "" : "text-danger")'>@addIn.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))</td>
+				<td class='@(addIn.IsActive ? "" : "text-danger")'>@addIn.Unit</td>
+				<td class='@(addIn.IsActive ? "" : "text-danger")'>
 					@{
 						var creator = AddInService.GetById(addIn.Id);
 						var user = UserService.GetById(creator.CreatedBy);
 						<span>@(creator == null ? "Admin" : user.Username)</span>
 					}
 				</td>
-				<td>
+				<td class='@(addIn.IsActive ? "" : "text-danger")'>
 					<p class="small mb-0"> @addIn.CreatedOn.ToString("MMM dd, yyyy h:mm tt")</p>
 				</td>
-				<td>
+				<td class='@(addIn.IsActive ? "" : "text-danger")'>
 					@if (_globalState.User is { Role: Role.Admin })
 					{
 						<button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditAddInDialog(addIn)">

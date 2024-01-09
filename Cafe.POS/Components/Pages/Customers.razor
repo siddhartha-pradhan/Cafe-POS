@@ -21,7 +21,7 @@
 					<input type="search" class="form-control search" placeholder="Search a user" @oninput="SearchUserName" />
 					<a class='btn text-@(_sortBy == "username" ? "primary" : "secondary")' data-mdb-toggle="tooltip" 
 						@onclick='()=>SortByHandler("username")'>
-						<span class='oi oi-sort-@(_sortBy == "username" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "username" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -30,7 +30,7 @@
 					Phone Number
 					<a class='btn text-@(_sortBy == "phoneNumber" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("phoneNumber")'>
-						<span class='oi oi-sort-@(_sortBy == "phoneNumber" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "phoneNumber" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -39,7 +39,7 @@
 					Orders
 					<a class='btn text-@(_sortBy == "order" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("order")'>
-						<span class='oi oi-sort-@(_sortBy == "order" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "order" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -48,7 +48,7 @@
 					Registered Date
 					<a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdAt")'>
-						<span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdAt" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -57,7 +57,7 @@
 					Registered By
 					<a class='btn text-@(_sortBy == "createdBy" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdBy")'>
-						<span class='oi oi-sort-@(_sortBy == "createdBy" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdBy" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -68,13 +68,13 @@
 		@{
 			IEnumerable<Customer> customers = _customers;
 
-			customers = _tabFilter switch
+			customers = _sortBy switch
 			{
-				"username" => _sortDirection == "ascending" ? customers.OrderBy(p => p.Username) : customers.OrderByDescending(p => p.Username),
-				"phoneNumber" => _sortDirection == "ascending" ? customers.OrderBy(p => p.PhoneNumber) : customers.OrderByDescending(p => p.PhoneNumber),
-				"order" => _sortDirection == "ascending" ? customers.OrderBy(p => p.Orders) : customers.OrderByDescending(p => p.Orders),
-				"createdAt" => _sortDirection == "ascending" ? customers.OrderBy(p => p.CreatedOn) : customers.OrderByDescending(p => p.CreatedOn),
-				"createdBy" => _sortDirection == "ascending" ? customers.OrderBy(p => p.CreatedBy) : customers.OrderByDescending(p => p.CreatedBy),
+				"username" => _sortDirection == "up" ? customers.OrderBy(p => p.Username) : customers.OrderByDescending(p => p.Username),
+				"phoneNumber" => _sortDirection == "up" ? customers.OrderBy(p => p.PhoneNumber) : customers.OrderByDescending(p => p.PhoneNumber),
+				"order" => _sortDirection == "up" ? customers.OrderBy(p => p.Orders) : customers.OrderByDescending(p => p.Orders),
+				"createdAt" => _sortDirection == "up" ? customers.OrderBy(p => p.CreatedOn) : customers.OrderByDescending(p => p.CreatedOn),
+				"createdBy" => _sortDirection == "up" ? customers.OrderBy(p => p.CreatedBy) : customers.OrderByDescending(p => p.CreatedBy),
 				_ => customers
 			};
 

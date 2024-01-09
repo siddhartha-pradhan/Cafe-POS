@@ -31,7 +31,7 @@ public partial class AddIns
     
     private string _sortBy = "addIn";
     
-    private string _sortDirection = "ascending";
+    private string _sortDirection = "up";
     
     private readonly string _addInsPath = UtilityService.GetAppAddInsFilePath();
 
@@ -84,13 +84,13 @@ public partial class AddIns
     {
         if (_sortBy == sortByName)
         {
-            _sortDirection = _sortDirection == "ascending" ? "descending" : "ascending";
+            _sortDirection = _sortDirection == "up" ? "down" : "up";
         }
         else
         {
             _sortBy = sortByName;
 
-            _sortDirection = "ascending";
+            _sortDirection = "up";
         }
     }
 
@@ -196,5 +196,22 @@ public partial class AddIns
                 Console.WriteLine(e.Message);
             }
         }
+    }
+
+    private void UpdateActiveStatus(AddIn addIn)
+    {
+        var addInModel = new AddIn()
+        {
+            Id = addIn.Id,
+            Name = addIn.Name,
+            Description = addIn.Description,
+            Unit = addIn.Unit,
+            Price = addIn.Price,
+            IsActive = !addIn.IsActive,
+            LastModifiedBy = _globalState.User.Id,
+            LastModifiedOn = DateTime.Now
+        };
+        
+        _addIns = AddInService.Update(addInModel);
     }
 }

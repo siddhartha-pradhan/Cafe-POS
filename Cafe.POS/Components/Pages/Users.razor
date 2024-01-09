@@ -33,7 +33,7 @@
 					<input type="search" class="form-control search" placeholder="Search a user" @oninput="SearchUserName" />
 					<a class='btn text-@(_sortBy == "username" ? "primary" : "secondary")' data-mdb-toggle="tooltip" 
 						@onclick='()=>SortByHandler("username")'>
-						<span class='oi oi-sort-@(_sortBy == "username" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "username" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -42,7 +42,7 @@
 					Email
 					<a class='btn text-@(_sortBy == "email" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("email")'>
-						<span class='oi oi-sort-@(_sortBy == "email" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "email" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -51,7 +51,7 @@
 					Role
 					<a class='btn text-@(_sortBy == "role" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("role")'>
-						<span class='oi oi-sort-@(_sortBy == "role" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "role" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -60,7 +60,7 @@
 					Created At
 					<a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdAt")'>
-						<span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdAt" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -69,7 +69,7 @@
 					Created By
 					<a class='btn text-@(_sortBy == "createdBy" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdBy")'>
-						<span class='oi oi-sort-@(_sortBy == "createdBy" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdBy" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -86,11 +86,11 @@
 				"Staff" => users.Where(x => x.Role == Role.Staff),
 				_ => _sortBy switch
 				{
-					"username" => _sortDirection == "ascending" ? users.OrderBy(p => p.Username) : users.OrderByDescending(p => p.Username),
-					"email" => _sortDirection == "ascending" ? users.OrderBy(p => p.Email) : users.OrderByDescending(p => p.Email),
-					"role" => _sortDirection == "ascending" ? users.OrderBy(p => p.Role) : users.OrderByDescending(p => p.Role),
-					"createdAt" => _sortDirection == "ascending" ? users.OrderBy(p => p.CreatedOn) : users.OrderByDescending(p => p.CreatedOn),
-					"createdBy" => _sortDirection == "ascending" ? users.OrderBy(p => p.CreatedBy) : users.OrderByDescending(p => p.CreatedBy),
+					"username" => _sortDirection == "up" ? users.OrderBy(p => p.Username) : users.OrderByDescending(p => p.Username),
+					"email" => _sortDirection == "up" ? users.OrderBy(p => p.Email) : users.OrderByDescending(p => p.Email),
+					"role" => _sortDirection == "up" ? users.OrderBy(p => p.Role) : users.OrderByDescending(p => p.Role),
+					"createdAt" => _sortDirection == "up" ? users.OrderBy(p => p.CreatedOn) : users.OrderByDescending(p => p.CreatedOn),
+					"createdBy" => _sortDirection == "up" ? users.OrderBy(p => p.CreatedBy) : users.OrderByDescending(p => p.CreatedBy),
 					_ => users
 				}
 			};
@@ -109,7 +109,7 @@
 					}
 					</td>
 					<td>
-						<button disabled="@(_globalState.User != null && _globalState.User.Id == user.Id)"
+						<button disabled="@(_globalState.User != null && _globalState.User.Id == user.Id && _globalState.User.Role != Role.Admin)"
 							class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteUserDialog(user)">
 							<i class="fa-regular fa-trash-can"></i> &nbsp; Delete
 						</button>

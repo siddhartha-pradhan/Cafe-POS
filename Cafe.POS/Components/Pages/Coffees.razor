@@ -1,4 +1,5 @@
 ﻿@page "/coffees"
+@using System.Globalization
 @using Cafe.POS.Models
 @using Cafe.POS.Services
 
@@ -33,10 +34,15 @@
 		<tr>
 			<th>
 				<div class="d-flex">
-					<input type="search" class="form-control search" placeholder="Search a coffee" @oninput="SearchCoffeeName" />
+					Status
+				</div>
+			</th>
+			<th>
+				<div class="d-flex">
+					<input type="search" class="form-control search" placeholder="Search a Coffee" @oninput="SearchCoffeeName" />
 					<a class='btn text-@(_sortBy == "coffee" ? "primary" : "secondary")' data-mdb-toggle="tooltip" 
 						@onclick='()=>SortByHandler("coffee")'>
-						<span class='oi oi-sort-@(_sortBy == "coffee" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "coffee" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -45,7 +51,7 @@
 					Price
 					<a class='btn text-@(_sortBy == "price" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("price")'>
-						<span class='oi oi-sort-@(_sortBy == "price" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "price" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -54,7 +60,7 @@
 					Created By
 					<a class='btn text-@(_sortBy == "createdBy" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdBy")'>
-						<span class='oi oi-sort-@(_sortBy == "createdBy" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdBy" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -63,7 +69,7 @@
 					Created At
 					<a class='btn text-@(_sortBy == "createdAt" ? "primary" : "secondary")' data-mdb-toggle="tooltip"
 						@onclick='()=>SortByHandler("createdAt")'>
-						<span class='oi oi-sort-@(_sortBy == "createdAt" ? _sortDirection : "ascending")'></span>
+						<i class="fa-solid fa-sort-@(_sortBy == "createdAt" ? _sortDirection : "up")"></i>
 					</a>
 				</div>
 			</th>
@@ -80,10 +86,10 @@
 			"In Active" => coffees.Where(x => !x.IsActive),
 			_ => _sortBy switch
 			{
-				"coffee" => _sortDirection == "ascending" ? coffees.OrderBy(p => p.Name) : coffees.OrderByDescending(p => p.Name),
-				"price" => _sortDirection == "ascending" ? CoffeeService.MergeSort(coffees.ToList()) : coffees.OrderByDescending(p => p.Price),
-				"createdBy" => _sortDirection == "ascending" ? coffees.OrderBy(p => p.CreatedBy) : coffees.OrderByDescending(p => p.CreatedBy),
-				"createdAt" => _sortDirection == "ascending" ? coffees.OrderBy(p => p.CreatedOn) : coffees.OrderByDescending(p => p.CreatedOn),
+				"coffee" => _sortDirection == "up" ? coffees.OrderBy(p => p.Name) : coffees.OrderByDescending(p => p.Name),
+				"price" => _sortDirection == "up" ? CoffeeService.MergeSort(coffees.ToList()) : coffees.OrderByDescending(p => p.Price),
+				"createdBy" => _sortDirection == "up" ? coffees.OrderBy(p => p.CreatedBy) : coffees.OrderByDescending(p => p.CreatedBy),
+				"createdAt" => _sortDirection == "up" ? coffees.OrderBy(p => p.CreatedOn) : coffees.OrderByDescending(p => p.CreatedOn),
 				_ => coffees
 			}
 		};
@@ -91,29 +97,34 @@
 		foreach (var coffee in coffees)
 		{
 			<tr>
-				<td>@coffee.Name</td>
-				<td>@coffee.Price</td>
 				<td>
+					<div class="form-check">
+						<input class="form-check-input me-0" type="checkbox" checked="@coffee.IsActive" @onchange='()=>UpdateActiveStatus(coffee)' />
+					</div>
+				</td>
+				<td class='@(coffee.IsActive ? "" : "text-danger")'>@coffee.Name</td>
+				<td class="@(coffee.IsActive ? "text-end" : "text-danger text-end")">@coffee.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))</td>
+				<td class='@(coffee.IsActive ? "" : "text-danger")'>
 					@{
 						var creator = CoffeeService.GetById(coffee.Id);
 						var user = UserService.GetById(creator.CreatedBy);
 						<span>@(creator.Id == Guid.Empty ? "Administration" : user.Username)</span>
 					}
 				</td>
-				<td>
+				<td class='@(coffee.IsActive ? "" : "text-danger")'>
 					<p class="small mb-0"> @coffee.CreatedOn.ToString("MMM dd, yyyy h:mm tt")</p>
 				</td>
-				<td>
+				<td class='@(coffee.IsActive ? "" : "text-danger")'>
 					@if (_globalState.User != null)
 					{
 						switch (_globalState.User.Role)
 						{
 							case Role.Admin:
 							{
-								<button class="btn btn-outline-secondary" type="button" @onclick="()=>OpenEditCoffeeDialog(coffee)">
+								<button class="btn btn-outline-secondary" type="button" @onclick="() => OpenEditCoffeeDialog(coffee)">
 									<i class="fa-solid fa-pen"></i> &nbsp; Edit
 								</button>
-								<button class="btn btn-outline-danger" type="button" @onclick="()=>OpenDeleteCoffeeDialog(coffee)">
+								<button class="btn btn-outline-danger" type="button" @onclick="() => OpenDeleteCoffeeDialog(coffee)">
 									<i class="fa-solid fa-trash"></i> &nbsp; Delete
 								</button>
 								break;

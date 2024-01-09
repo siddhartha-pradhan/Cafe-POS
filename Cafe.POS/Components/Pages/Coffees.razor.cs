@@ -191,4 +191,20 @@ public partial class Coffees
             }
         }
     }
+    
+    private void UpdateActiveStatus(Coffee coffee)
+    {
+        var coffeeModel = new Coffee()
+        {
+            Id = coffee.Id,
+            Name = coffee.Name,
+            Description = coffee.Description,
+            Price = coffee.Price,
+            IsActive = !coffee.IsActive,
+            LastModifiedBy = _globalState.User.Id,
+            LastModifiedOn = DateTime.Now
+        };
+        
+        _coffees = CoffeeService.Update(coffeeModel);
+    }
 }
