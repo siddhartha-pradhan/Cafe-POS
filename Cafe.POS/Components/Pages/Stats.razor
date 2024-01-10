@@ -95,6 +95,10 @@
                         }
 					</select>
 				}
+				@if (_showDateInput)
+                {
+                	<input type="date" class="form-control" @bind="_selectedDateTime" />
+                }
 			</div>
 			@if (!string.IsNullOrEmpty(_recordErrorMessage))
 			{
@@ -106,4 +110,5 @@
 			}
 		</form>
 	</ModalDialog>
+}
 }

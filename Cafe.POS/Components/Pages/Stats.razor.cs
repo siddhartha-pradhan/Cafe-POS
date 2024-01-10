@@ -19,11 +19,15 @@ public partial class Stats
 
     private int _selectedMonth { get; set; }
 
+    private DateTime _selectedDateTime { get; set; }
+
     private string _recordErrorMessage { get; set; }
 
     private string _recordSuccessMessage { get; set; }
 
     private bool _showMonthsDropdown { get; set; }
+
+    private bool _showDateInput { get; set; }
     
     private string _dialogTitle { get; set; }
     
@@ -151,6 +155,20 @@ public partial class Stats
         _selectedAction = Convert.ToInt32(e.Value.ToString());
 
         _showMonthsDropdown = _selectedAction == 2;
+
+        if (_showMonthsDropdown)
+        {
+            _showDateInput = false;
+            return;
+        }
+        
+        _showDateInput = _selectedAction == 1;
+        
+        _selectedDateTime = DateTime.Now;
+        
+        _selectedMonth = 0;
+
+        _showMonthsDropdown = false;
     }
     
     private void OnDownloadReport(bool isClosed)
@@ -197,9 +215,16 @@ public partial class Stats
             var orderAddIns = OrderAddInService.GetAll(_orderAddInsPath);
 
             orders = _selectedAction == 1
-                ? orders.Where(x => x.CreatedOn.Date == DateTime.Today.Date).ToList()
+                ? orders.Where(x => x.CreatedOn.Date == _selectedDateTime).ToList()
                 : orders.Where(x => x.CreatedOn.Month == _selectedMonth).ToList();
 
+            if (orders.Count == 0)
+            {
+                throw new Exception(_selectedAction == 1
+                    ? "No sales record found for the selected date."
+                    : "No sales record found for the selected month.");
+            }
+            
             var coffeeSales = coffees.Select(coffee => new OrderRecords()
                 {
                     Id = coffee.Id,
@@ -249,13 +274,6 @@ public partial class Stats
             var orderRecordsEnumerable = coffeeSales as OrderRecords[] ?? coffeeSales.ToArray();
             var addInRecords = addInSales as OrderRecords[] ?? addInSales.ToArray();
             
-            if (orderRecordsEnumerable.All(x => x.TotalSales == 0) && addInRecords.All(x => x.TotalSales == 0))
-            {
-                throw new Exception(_selectedAction == 1
-                    ? "No sales record found for today."
-                    : "No sales record found for the selected month.");
-            }
-
             var reportName = $"Bislerium Revenue Report - {DateTime.Now:dd-MM-yyyy HH:mm:ss} [{(_selectedAction == 1 ? "Daily" : "Monthly")} Report_{GetReportFrequency()}].pdf";
 
             var reportModel = new PDF.PDF()
