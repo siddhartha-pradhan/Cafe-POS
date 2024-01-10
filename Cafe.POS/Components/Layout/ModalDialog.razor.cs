@@ -14,6 +14,9 @@ public partial class ModalDialog
     public string OkLabel { get; set; }
 
     [Parameter] 
+    public string Size { get; set; } = "";
+
+    [Parameter] 
     public EventCallback<bool> OnClose { get; set; }
 
     private Task ModalCancel()
