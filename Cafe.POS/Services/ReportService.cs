@@ -11,7 +11,6 @@ public static class ReportService
     public static void GeneratePdfReport(IJSRuntime jsRuntime, PDF.PDF pdfExport)
     {
         jsRuntime.InvokeAsync<object>("downloadPdfReport", pdfExport.FileName, Convert.ToBase64String(PdfReport(pdfExport)));
-        jsRuntime.InvokeAsync<object>("openPdfFile", pdfExport.FileName);
     }
     
     private static byte[] PdfReport(PDF.PDF pdfExport)
