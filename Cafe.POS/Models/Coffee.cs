@@ -1,4 +1,6 @@
-﻿namespace Cafe.POS.Models;
+﻿using Cafe.POS.Models.Base;
+
+namespace Cafe.POS.Models;
 
 public class Coffee : BaseEntity
 {

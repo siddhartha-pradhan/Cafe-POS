@@ -1,5 +1,6 @@
 ﻿@page "/stats"
 @using System.Globalization
+@using Cafe.POS.Models.DTOs
 @inject IJSRuntime _jsRuntime
 
 <div class="row mt-3 mb-3">
@@ -50,7 +51,7 @@
 	</thead>
 	<tbody>
 	@{
-		IEnumerable<OrderModel> orderModels = _orderModels;
+		IEnumerable<OrderRecords> orderModels = _orderModels;
 
 		foreach (var item in orderModels)
 		{

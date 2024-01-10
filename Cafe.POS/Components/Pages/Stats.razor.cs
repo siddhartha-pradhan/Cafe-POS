@@ -1,4 +1,8 @@
-﻿using Cafe.POS.Models;
+﻿using System.Globalization;
+using Cafe.POS.Models;
+using Cafe.POS.Models.Base;
+using Cafe.POS.Models.DTOs;
+using Cafe.POS.Models.Enums;
 using Cafe.POS.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -8,8 +12,6 @@ public partial class Stats
 {
     [CascadingParameter] 
     private GlobalState _globalState { get; set; }
-
-    private List<OrderModel> _orderModels { get; set; } = new();
     
     private bool _showStatsDialog { get; set; }
     
@@ -27,7 +29,9 @@ public partial class Stats
     
     private string _dialogOkLabel { get; set; }
     
-    private string _tabFilter = "Coffee";
+    private string _tabFilter { get; set; } = "Coffee";
+    
+    private List<OrderRecords> _orderModels { get; set; } = new();
     
     private readonly string _ordersPath = UtilityService.GetAppOrdersFilePath();
     
@@ -36,7 +40,7 @@ public partial class Stats
     private readonly string _addInsPath = UtilityService.GetAppAddInsFilePath();
     
     private readonly string _orderAddInsPath = UtilityService.GetAppOrderAddInsFilePath();
-
+    
     protected override void OnInitialized()
     {
         var coffees = CoffeeService.GetAll(_coffeesPath);
@@ -51,7 +55,7 @@ public partial class Stats
 
             var orderList = orderItems as Order[] ?? orderItems.ToArray();
 
-            _orderModels.Add(new OrderModel()
+            _orderModels.Add(new OrderRecords()
             {
                 Id = coffee.Id,
                 Name = coffee.Name,
@@ -82,7 +86,7 @@ public partial class Stats
 
                     var orderList = orderItems as Order[] ?? orderItems.ToArray();
 
-                    _orderModels.Add(new OrderModel()
+                    _orderModels.Add(new OrderRecords()
                     {
                         Id = coffee.Id,
                         Name = coffee.Name,
@@ -108,7 +112,7 @@ public partial class Stats
 
                     var orderAddInItems = orderItems as OrderAddIn[] ?? orderItems.ToArray();
                     
-                    _orderModels.Add(new OrderModel()
+                    _orderModels.Add(new OrderRecords()
                     {
                         Id = addIn.Id,
                         Name = addIn.Name,
@@ -165,17 +169,14 @@ public partial class Stats
                 {
                     case 0:
                         throw new Exception("Select a valid action before submitting your request.");
-                    case 1:
-                        break;
                     case 2 when _selectedMonth == 0:
                         throw new Exception("Select a valid action before submitting your request.");
+                    case 1:
                     case 2:
                         break;
                 }
 
                 GeneratePdf();
-                
-                _recordSuccessMessage = "Your report has been successfully generated, please check your downloads folder.";
             }
             catch (Exception e)
             {
@@ -188,15 +189,18 @@ public partial class Stats
     
     private void GeneratePdf()
     {
-        if (_selectedAction == 1)
+        try
         {
-            var coffees = CoffeeService.GetAll(_coffeesPath);
+            var orders = OrderService.GetAll(_ordersPath);
             var addIns = AddInService.GetAll(_addInsPath);
+            var coffees = CoffeeService.GetAll(_coffeesPath);
             var orderAddIns = OrderAddInService.GetAll(_orderAddInsPath);
-            var orders = OrderService.GetAll(_ordersPath).Where(x => x.CreatedOn.Date == DateTime.Today.Date);
 
-            var coffeeModel = coffees
-                .Select(coffee => new OrderModel
+            orders = _selectedAction == 1
+                ? orders.Where(x => x.CreatedOn.Date == DateTime.Today.Date).ToList()
+                : orders.Where(x => x.CreatedOn.Month == _selectedMonth).ToList();
+
+            var coffeeSales = coffees.Select(coffee => new OrderRecords()
                 {
                     Id = coffee.Id,
                     Name = coffee.Name,
@@ -209,10 +213,17 @@ public partial class Stats
                         .ToString("dd-MM-yyyy")
                 })
                 .OrderByDescending(x => x.TotalSales)
-                .Take(5);
+                .Take(5)
+                .Select(orderModel =>
+                {
+                    if (orderModel.LastOrderedDate == DateTime.MinValue.ToString("dd-MM-yyyy"))
+                    {
+                        orderModel.LastOrderedDate = "Not ordered yet";
+                    }
+                    return orderModel;
+                });
 
-            var addInModel = addIns
-                .Select(addIn => new OrderModel
+            var addInSales = addIns.Select(addIn => new OrderRecords()
                 {
                     Id = addIn.Id,
                     Name = addIn.Name,
@@ -225,63 +236,57 @@ public partial class Stats
                         .ToString("dd-MM-yyyy")
                 })
                 .OrderByDescending(x => x.TotalSales)
-                .Take(5);
+                .Take(5)
+                .Select(orderModel =>
+                {
+                    if (orderModel.LastOrderedDate == DateTime.MinValue.ToString("dd-MM-yyyy"))
+                    {
+                        orderModel.LastOrderedDate = "Not ordered yet";
+                    }
+                    return orderModel;
+                });
 
-            ReportService.GeneratePdfReport(_jsRuntime, "report.pdf", coffeeModel, addInModel);
+            var orderRecordsEnumerable = coffeeSales as OrderRecords[] ?? coffeeSales.ToArray();
+            var addInRecords = addInSales as OrderRecords[] ?? addInSales.ToArray();
+            
+            if (orderRecordsEnumerable.All(x => x.TotalSales == 0) && addInRecords.All(x => x.TotalSales == 0))
+            {
+                throw new Exception(_selectedAction == 1
+                    ? "No sales record found for today."
+                    : "No sales record found for the selected month.");
+            }
+
+            var reportName = $"Bislerium Revenue Report - {DateTime.Now:dd-MM-yyyy HH:mm:ss} [{(_selectedAction == 1 ? "Daily" : "Monthly")} Report_{GetReportFrequency()}].pdf";
+
+            var reportModel = new PDF.PDF()
+            {
+                Title = _selectedAction == 1 ? "Daily Report" : "Monthly Report",
+                Frequency = GetReportFrequency(),
+                TotalRevenue = orders.Sum(x => x.TotalPrice),
+                FileName = reportName,
+                CoffeeRecords = orderRecordsEnumerable,
+                AddInRecords = addInRecords,
+                UserName = _globalState.User?.Username ?? "",
+                Role = _globalState.User?.Role == Role.Admin ? "Admin" : "Staff"
+            };
+
+            ReportService.GeneratePdfReport(_jsRuntime, reportModel);
+
+            _recordSuccessMessage = "Your report has been successfully generated, please check your downloads folder.";
         }
-        else
+        catch (Exception e)
         {
-            var coffees = CoffeeService.GetAll(_coffeesPath);
-            var addIns = AddInService.GetAll(_addInsPath);
-            var orderAddIns = OrderAddInService.GetAll(_orderAddInsPath);
-            var orders = OrderService.GetAll(_ordersPath).Where(x => x.CreatedOn.Month == _selectedMonth);
+            _recordErrorMessage = e.Message;
 
-            var coffeeModel = coffees
-                .Select(coffee => new OrderModel
-                {
-                    Id = coffee.Id,
-                    Name = coffee.Name,
-                    Price = coffee.Price,
-                    TotalSales = orders.Where(x => x.CoffeeId == coffee.Id).Sum(x => x.CoffeeQuantity),
-                    LastOrderedDate = orders.Where(x => x.CoffeeId == coffee.Id)
-                        .Select(x => x.CreatedOn)
-                        .DefaultIfEmpty(DateTime.MinValue)
-                        .Max()
-                        .ToString("dd-MM-yyyy")
-                })
-                .OrderByDescending(x => x.TotalSales)
-                .Take(5);
-
-            var addInModel = addIns
-                .Select(addIn => new OrderModel
-                {
-                    Id = addIn.Id,
-                    Name = addIn.Name,
-                    Price = addIn.Price,
-                    TotalSales = orderAddIns.Where(x => x.AddInId == addIn.Id).Sum(x => x.AddInQuantity),
-                    LastOrderedDate = orderAddIns.Where(x => x.AddInId == addIn.Id)
-                        .Select(x => x.CreatedOn)
-                        .DefaultIfEmpty(DateTime.MinValue)
-                        .Max()
-                        .ToString("dd-MM-yyyy")
-                })
-                .OrderByDescending(x => x.TotalSales)
-                .Take(5);
-
-            ReportService.GeneratePdfReport(_jsRuntime, "report.pdf", coffeeModel, addInModel);
+            Console.WriteLine(e.Message);
         }
+    }
+    
+    private string GetReportFrequency()
+    {
+        return _selectedAction == 1
+            ? DateTime.Now.ToString("dd-MM-yyyy")
+            : DateTimeFormatInfo.CurrentInfo.GetMonthName(_selectedMonth);
     }
 }
 
-public class OrderModel
-{
-    public Guid Id { get; set; }
-    
-    public string Name { get; set; }
-
-    public decimal Price { get; set; }
-    
-    public int TotalSales { get; set; }
-
-    public string LastOrderedDate { get; set; }
-}

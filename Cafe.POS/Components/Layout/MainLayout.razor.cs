@@ -1,4 +1,5 @@
 ﻿using Cafe.POS.Models;
+using Cafe.POS.Models.Base;
 using Cafe.POS.Services;
 
 namespace Cafe.POS.Components.Layout;

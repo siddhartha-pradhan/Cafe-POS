@@ -1,4 +1,5 @@
 ﻿using Cafe.POS.Models;
+using Cafe.POS.Models.Enums;
 using Microsoft.AspNetCore.Components;
 
 namespace Cafe.POS.Components.Layout;

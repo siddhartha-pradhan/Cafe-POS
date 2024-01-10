@@ -1,4 +1,7 @@
-﻿namespace Cafe.POS.Models;
+﻿using Cafe.POS.Models.Base;
+using Cafe.POS.Models.Enums;
+
+namespace Cafe.POS.Models;
 
 public class AddIn : BaseEntity
 {

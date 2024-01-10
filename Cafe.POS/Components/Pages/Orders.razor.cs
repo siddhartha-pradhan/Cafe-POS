@@ -1,4 +1,5 @@
 ﻿using Cafe.POS.Models;
+using Cafe.POS.Models.Base;
 using Cafe.POS.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -7,26 +8,17 @@ namespace Cafe.POS.Components.Pages;
 public partial class Orders
 {
     [CascadingParameter] 
-    private GlobalState _globalState { get; set; }
+    private GlobalState GlobalState { get; set; }
 
-    private List<Order> _orders { get; set; }
+    private List<Order> OrdersList { get; set; }
 
-    private List<OrderAddIn> _orderAddIns { get; set; }
+    private List<OrderAddIn> OrderAddIns { get; set; }
 
-    private List<Customer> _customers { get; set; }
-
-    private List<OrderAddIn> _orderAddInModel { get; set; } =
-    [
-        new OrderAddIn()
-        {
-            AddInId = Guid.Empty,
-            AddInQuantity = 0
-        }
-    ];
-
-    private List<Coffee> _coffees { get; set; }
+    private List<Customer> Customers { get; set; }
     
-    private List<AddIn> _addIns { get; set; }
+    private List<Coffee> Coffees { get; set; }
+    
+    private List<AddIn> AddIns { get; set; }
     
     private bool _showAddOrderDialog { get; set; }
 
@@ -36,19 +28,24 @@ public partial class Orders
     
     private string _addOrderErrorMessage { get; set; }
     
-    private Order? _orderModel { get; set; }
-    
     private string _dialogTitle { get; set; }
     
     private string _dialogOkLabel { get; set; }
     
-    private string _tabFilter = "All";
-    
-    private string _sortDirection = "ascending";
-
     private decimal _actualAmount;
     
     private decimal _payableAmount;
+    
+    private Order? _orderModel { get; set; }
+
+    private List<OrderAddIn> _orderAddInModel =
+    [
+        new OrderAddIn()
+        {
+            AddInId = Guid.Empty,
+            AddInQuantity = 0
+        }
+    ];
     
     private readonly string _ordersPath = UtilityService.GetAppOrdersFilePath();
 
@@ -62,11 +59,11 @@ public partial class Orders
 
     protected override void OnInitialized()
     {
-        _orders = OrderService.GetAll(_ordersPath);
-        _customers = CustomerService.GetAll(_customersPath);
-        _coffees = CoffeeService.GetAll(_coffeesPath).Where(x => x.IsActive).ToList();
-        _addIns = AddInService.GetAll(_addInsPath).Where(x => x.IsActive).ToList();
-        _orderAddIns = OrderAddInService.GetAll(_orderAddInsPath);
+        OrdersList = OrderService.GetAll(_ordersPath);
+        Customers = CustomerService.GetAll(_customersPath);
+        Coffees = CoffeeService.GetAll(_coffeesPath).Where(x => x.IsActive).ToList();
+        AddIns = AddInService.GetAll(_addInsPath).Where(x => x.IsActive).ToList();
+        OrderAddIns = OrderAddInService.GetAll(_orderAddInsPath);
     }
 
     private void OpenAddUserDialog()
@@ -109,21 +106,36 @@ public partial class Orders
                     TotalPrice = _payableAmount,
                     PaymentMode = _orderModel.PaymentMode,
                     IsActive = true,
-                    CreatedBy = _globalState.User.Id,
+                    CreatedBy = GlobalState.User.Id,
                 };
 
+                if(order.CustomerId == Guid.Empty)
+                {
+                    throw new Exception("Please select a customer before proceeding your order transaction.");
+                }
+                
+                if(order.CoffeeId == Guid.Empty || order.CoffeeQuantity == 0)
+                {
+                    throw new Exception("Please select a coffee and its respective quantity to be ordered.");
+                }
+                
                 var orderAddIns = _orderAddInModel.Select(x => new OrderAddIn()
                 {
                     OrderId = order.Id,
                     AddInId = x.AddInId,
                     AddInQuantity = x.AddInQuantity,
                     IsActive = true,
-                    CreatedBy = _globalState.User.Id,
+                    CreatedBy = GlobalState.User.Id,
                 }).ToList();
                 
-                _orders = OrderService.Create(order);
+                if(orderAddIns.Any(x => x.AddInId == Guid.Empty || x.AddInQuantity == 0))
+                {
+                    throw new Exception("Please select an add-in and its respective quantity to be ordered.");
+                }
+                
+                OrdersList = OrderService.Create(order);
 
-                _orderAddIns = OrderAddInService.Create(orderAddIns);
+                OrderAddIns = OrderAddInService.Create(orderAddIns);
 
                 CustomerService.UpdateOrderCount(_orderModel.CustomerId);
                 
@@ -172,7 +184,7 @@ public partial class Orders
         
         var coffeeQuantity = int.Parse(e.Value.ToString());
 
-        var coffeePrice = _coffees.FirstOrDefault(x => x.Id == _orderModel.CoffeeId)?.Price ?? 0;
+        var coffeePrice = Coffees.FirstOrDefault(x => x.Id == _orderModel.CoffeeId)?.Price ?? 0;
 
         var addInAmount = (from orderAddIn in _orderAddInModel 
             let addInPrice = AddInService.GetAll(_addInsPath).FirstOrDefault(x => x.Id == orderAddIn.AddInId)?.Price ?? 0 
@@ -216,7 +228,7 @@ public partial class Orders
 
         _orderAddInModel[index].AddInQuantity = addInQuantityCount;
         
-        var coffeePrice = _coffees.FirstOrDefault(x => x.Id == _orderModel.CoffeeId)?.Price ?? 0;
+        var coffeePrice = Coffees.FirstOrDefault(x => x.Id == _orderModel.CoffeeId)?.Price ?? 0;
 
         var coffeeQuantity = _orderModel?.CoffeeQuantity ?? 0;
 

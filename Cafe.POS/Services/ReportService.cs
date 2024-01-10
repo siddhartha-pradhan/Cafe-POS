@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Cafe.POS.Components.Pages;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.JSInterop;
@@ -9,13 +8,13 @@ namespace Cafe.POS.Services;
 
 public static class ReportService
 {
-    public static void GeneratePdfReport(IJSRuntime jsRuntime, string fileName, IEnumerable<OrderModel> orderModels, IEnumerable<OrderModel> addInModels)
+    public static void GeneratePdfReport(IJSRuntime jsRuntime, PDF.PDF pdfExport)
     {
-        jsRuntime.InvokeAsync<object>("downloadPdfReport", fileName, Convert.ToBase64String(PdfReport(orderModels, addInModels)));
-        jsRuntime.InvokeAsync<object>("openPdfFile", fileName);
+        jsRuntime.InvokeAsync<object>("downloadPdfReport", pdfExport.FileName, Convert.ToBase64String(PdfReport(pdfExport)));
+        jsRuntime.InvokeAsync<object>("openPdfFile", pdfExport.FileName);
     }
     
-    private static byte[] PdfReport(IEnumerable<OrderModel> coffeeModels, IEnumerable<OrderModel> addInModels)
+    private static byte[] PdfReport(PDF.PDF pdfExport)
     {
         var document = new Document(PageSize.A4, 20, 20, 40, 40);
         
@@ -31,24 +30,47 @@ public static class ReportService
 
         var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
         
-        var title = new Paragraph("Cafe.POS Revenue Report", titleFont)
+        var title = new Paragraph("Bislerium Revenue Report", titleFont)
         {
             Alignment = Element.ALIGN_CENTER
         };
         
         document.Add(title);
 
-        var dateFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
+        var headingFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
         
-        var currentDate = DateTime.Now.ToString("dddd, dd MMMM yyyy", CultureInfo.InvariantCulture);
-        
-        var dateParagraph = new Paragraph($"Report generated on: {currentDate}", dateFont)
+        var headingParagraph = new Paragraph(pdfExport.Title, headingFont)
         {
             Alignment = Element.ALIGN_CENTER,
             SpacingAfter = 20
         };
-        document.Add(dateParagraph);
+        
+        document.Add(headingParagraph);
+        
+        var dateFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+        
+        var currentDate = DateTime.Now.ToString("dddd, dd MMMM yyyy", CultureInfo.InvariantCulture);
 
+        var infoParagraph = new Paragraph();
+
+        var frequencyChunk = new Chunk($"Frequency: {pdfExport.Frequency}", dateFont);
+        
+        var dateChunk = new Chunk($"{currentDate}", dateFont);
+
+        infoParagraph.Add(frequencyChunk);
+        
+        infoParagraph.Add(Chunk.TABBING);
+        
+        infoParagraph.Add(Chunk.TABBING);
+        
+        infoParagraph.Add(dateChunk);
+        
+        infoParagraph.TabSettings = new TabSettings(200f);
+        
+        infoParagraph.SpacingAfter = 20;
+
+        document.Add(infoParagraph);
+        
         var coffeeTable = new PdfPTable(4)
         {
             WidthPercentage = 100
@@ -61,12 +83,26 @@ public static class ReportService
         coffeeTable.AddCell(CreateCell("Total Sales", true));
         coffeeTable.AddCell(CreateCell("Last Ordered Date", true));
 
-        foreach (var item in coffeeModels)
+        if (!pdfExport.CoffeeRecords.Any())
         {
-            coffeeTable.AddCell(CreateCell(item.Name));
-            coffeeTable.AddCell(CreateCell($"Rs {item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))}"));
-            coffeeTable.AddCell(CreateCell(item.TotalSales.ToString()));
-            coffeeTable.AddCell(CreateCell(item.LastOrderedDate));
+            var noRecordsCell = new PdfPCell(new Phrase("No records to display.", FontFactory.GetFont(FontFactory.HELVETICA)))
+            {
+                Colspan = 4,
+                Padding = 8,
+                HorizontalAlignment = Element.ALIGN_CENTER
+            };
+
+            coffeeTable.AddCell(noRecordsCell);
+        }
+        else
+        {
+            foreach (var item in pdfExport.CoffeeRecords)
+            {
+                coffeeTable.AddCell(CreateCell(item.Name));
+                coffeeTable.AddCell(CreateCell($"Rs {item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))}"));
+                coffeeTable.AddCell(CreateCell(item.TotalSales.ToString()));
+                coffeeTable.AddCell(CreateCell(item.LastOrderedDate));
+            }
         }
 
         document.Add(coffeeTable);
@@ -83,15 +119,63 @@ public static class ReportService
         addInTable.AddCell(CreateCell("Total Sales", true));
         addInTable.AddCell(CreateCell("Last Ordered Date", true));
 
-        foreach (var item in addInModels)
+        if (!pdfExport.AddInRecords.Any())
         {
-            addInTable.AddCell(CreateCell(item.Name));
-            addInTable.AddCell(CreateCell($"Rs {item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))}"));
-            addInTable.AddCell(CreateCell(item.TotalSales.ToString()));
-            addInTable.AddCell(CreateCell(item.LastOrderedDate));
-        }
+            var noRecordsCell = new PdfPCell(new Phrase("No records to display.", FontFactory.GetFont(FontFactory.HELVETICA)))
+            {
+                Colspan = 4,
+                Padding = 8,
+                HorizontalAlignment = Element.ALIGN_CENTER
+            };
 
+            addInTable.AddCell(noRecordsCell);
+        }
+        else
+        {
+            foreach (var item in pdfExport.AddInRecords)
+            {
+                addInTable.AddCell(CreateCell(item.Name));
+                addInTable.AddCell(CreateCell($"Rs {item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))}"));
+                addInTable.AddCell(CreateCell(item.TotalSales.ToString()));
+                addInTable.AddCell(CreateCell(item.LastOrderedDate));
+            }
+        }
+        
         document.Add(addInTable);
+
+        document.Add(new Paragraph("\n"));
+
+        var revenueFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 14);
+
+        var revenueParagraph = new Paragraph($"Total Revenue: Rs {pdfExport.TotalRevenue.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP"))}", revenueFont)
+        {
+            Alignment = Element.ALIGN_CENTER,
+            SpacingAfter = 10
+        };
+        
+        document.Add(revenueParagraph);
+
+        document.Add(new Paragraph("\n"));
+
+        var reportSignatureFont = FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 12);
+        
+        var reportFooterSignature = new Paragraph("_____________________________________", reportSignatureFont)
+        {
+            Alignment = Element.ALIGN_RIGHT,
+            SpacingAfter = 10
+        };
+        
+        document.Add(reportFooterSignature);
+        
+        var reportFooterFont = FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 12);
+
+        var reportFooterParagraph = new Paragraph($"{pdfExport.UserName} ({pdfExport.Role})", reportFooterFont)
+        {
+            Alignment = Element.ALIGN_RIGHT,
+            SpacingAfter = 10
+        };
+        
+        document.Add(reportFooterParagraph);
 
         document.Close();
         

@@ -1,4 +1,6 @@
 ﻿using Cafe.POS.Models;
+using Cafe.POS.Models.Base;
+using Cafe.POS.Models.Enums;
 using Cafe.POS.Services;
 using Microsoft.AspNetCore.Components;
 

@@ -1,4 +1,4 @@
-﻿namespace Cafe.POS.Models;
+﻿namespace Cafe.POS.Models.Base;
 
 public class BaseEntity
 {

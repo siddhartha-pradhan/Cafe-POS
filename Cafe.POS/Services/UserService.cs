@@ -1,4 +1,5 @@
 ﻿using Cafe.POS.Models;
+using Cafe.POS.Models.Enums;
 
 namespace Cafe.POS.Services;
 

@@ -2,6 +2,7 @@
 @using Cafe.POS.Models
 @using Cafe.POS.Services
 @using System.Globalization
+@using Cafe.POS.Models.Enums
 
 <div class="row mt-3 mb-3">
     <div class="col-6">
@@ -61,9 +62,9 @@
 	</thead>
 	<tbody>
 		@{
-			IEnumerable<Order> orders = _orders;
+			IEnumerable<Order> orders = OrdersList;
 			
-			IEnumerable<OrderAddIn> orderAddIns = _orderAddIns;
+			IEnumerable<OrderAddIn> orderAddIns = OrderAddIns;
 
 			foreach (var order in orders)
 			{
@@ -129,7 +130,7 @@
 					<label class="form-label">&nbsp;Customer</label>
 					<select class="form-control" @onchange="OnCustomerSelection">
 						<option disabled="" selected="" label="Select a customer"></option>
-						@foreach (var item in _customers)
+						@foreach (var item in Customers)
 						{
 							<option value="@item.Id">@item.Username</option>
 						}
@@ -150,7 +151,7 @@
 					<label class="form-label">&nbsp;Coffee</label>
 					<select class="form-control" @bind="_orderModel.CoffeeId">
 						<option selected="selected" disabled="disabled">Select a Coffee</option>
-						@foreach (var item in _coffees)
+						@foreach (var item in Coffees)
 						{
 							<option value="@item.Id">@item.Name (Rs @item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP")))</option>
 						}
@@ -170,7 +171,7 @@
                         <label class="form-label">&nbsp;Add In</label>
                         <select class="form-control" value="@_orderAddInModel[currentIndex].AddInId" @oninput="(e) => _orderAddInModel[currentIndex].AddInId = Guid.Parse(e.Value.ToString())">
                             <option disabled="" selected="" label="Select an add in"></option>
-                            @foreach (var item in _addIns)
+                            @foreach (var item in AddIns)
                             {
                                 <option value="@item.Id">@item.Name (Rs @item.Price.ToString("N2", CultureInfo.CreateSpecificCulture("ne-NP")))</option>
                             }

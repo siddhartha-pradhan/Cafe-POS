@@ -1,4 +1,5 @@
 ﻿using Cafe.POS.Models;
+using Cafe.POS.Models.Base;
 using Microsoft.AspNetCore.Components;
 
 namespace Cafe.POS.Components.Pages;
